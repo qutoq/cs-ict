@@ -1,0 +1,66 @@
+-- обновление значения в оrders, orderitems по формуле 
+UPDATE OrderItems
+SET sub_total = (
+    SELECT quantity * price
+    FROM Products p
+    WHERE OrderItems.product_id = p.product_id
+)
+WHERE EXISTS (
+    SELECT 1
+    FROM Products p
+    WHERE OrderItems.product_id = p.product_id
+);
+
+
+
+UPDATE Orders
+SET total_amount = (
+    SELECT COALESCE(SUM(sub_total), 0)
+    FROM OrderItems
+    WHERE OrderItems.order_id = Orders.order_id
+)
+WHERE EXISTS (
+    SELECT 1
+    FROM OrderItems
+    WHERE OrderItems.order_id = Orders.order_id
+);
+
+
+-- cколько заказов сделали клиенты
+SELECT Guests.guest_name, COUNT(Orders.order_id) AS total_orders
+FROM Guests
+LEFT JOIN Orders ON Guests.guest_id = Orders.guest_id
+GROUP BY Guests.guest_name;
+
+
+-- топ 5 барист по сумме обработанных заказов
+SELECT
+  b.barista_id,
+  b.name AS barista_name,
+  SUM(o.total_amount) AS total_amount
+FROM
+  Вaristas b
+JOIN
+  Orders o ON b.barista_id = o.barista_id
+GROUP BY
+  b.barista_id, b.name
+ORDER BY
+  total_amount DESC
+LIMIT 5;
+
+--средний чек в каждой кофейне
+SELECT
+  cs.name AS coffee_shop,
+  COUNT(o.order_id) AS total_orders,
+  AVG(o.total_amount) AS average_amount
+FROM
+  СoffeeShops cs
+LEFT JOIN
+  Orders o ON cs.shop_id = o.shop_id
+GROUP BY
+  cs.shop_id, cs.name
+ORDER BY
+  average_amount DESC;
+  
+  
+
