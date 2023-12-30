@@ -1,0 +1,63 @@
+CREATE TABLE СoffeeShops (
+	shop_id INTEGER PRIMARY KEY,
+	name TEXT NOT NULL,
+	address TEXT,
+	description TEXT
+);
+
+CREATE TABLE Guests (
+	guest_id INTEGER PRIMARY KEY,
+	guest_name TEXT NOT NULL
+);
+
+CREATE TABLE Вaristas (
+	barista_id INTEGER PRIMARY KEY,
+	name TEXT NOT NULL,
+	birth_day DATE,
+	phone_number TEXT
+);
+
+CREATE TABLE Shifts (
+	shift_id INTEGER PRIMARY KEY,
+	shop_id INTEGER,
+	barista1_id INTEGER,
+	barista2_id INTEGER,
+	date_shift DATE,
+	work_time INTEGER,
+	shift_number INTEGER,
+	FOREIGN KEY (shop_id) REFERENCES CoffeeShops(shop_id),
+	FOREIGN KEY (barista1_id) REFERENCES Baristas(barista_id),
+	FOREIGN KEY (barista2_id) REFERENCES Baristas(barista_id)
+);
+
+CREATE TABLE Products (
+	product_id INTEGER PRIMARY KEY,
+	name TEXT NOT NULL,
+	description TEXT,
+	price INTEGER NOT NULL,
+	category TEXT
+);
+
+CREATE TABLE Orders (
+	order_id INTEGER PRIMARY KEY,
+	shop_id INTEGER,
+    barista_id INTEGER, 
+    shift_id INTEGER,
+	guest_id INTEGER,
+	order_date DATETIME NOT NULL,
+	total_amount INTEGER CHECK (total_amount >= 0),
+    FOREIGN KEY (barista_id) REFERENCES Baristas(barista_id),
+    FOREIGN KEY (shift_id) REFERENCES Shifts(shift_id),
+	FOREIGN KEY (guest_id) REFERENCES Guests(guest_id),
+	FOREIGN KEY (shop_id) REFERENCES CoffeeShops(shop_id)
+);
+
+CREATE TABLE OrderItems (
+	order_item_id INTEGER PRIMARY KEY,
+	order_id INTEGER,
+	product_id INTEGER,
+	quantity INTEGER NOT NULL,
+	sub_total INTEGER NOT NULL,
+	FOREIGN KEY (order_id) REFERENCES Orders(order_id),
+	FOREIGN KEY (product_id) REFERENCES Products(product_id)
+);
